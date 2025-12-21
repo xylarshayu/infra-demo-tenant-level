@@ -1,3 +1,4 @@
+import type { Request } from "express";
 import { Agent } from "undici";
 import type { IApiResponse, ResponseType } from "../../types/index.js";
 
@@ -7,6 +8,10 @@ const sharedAgent = new Agent({
 	connections: 50,
 });
 
+type FetchOptions = RequestInit & {
+	query?: Request["query"];
+};
+
 export const createClient = (
 	baseUrl: string,
 	defaultHeaders: Record<string, string> = {},
@@ -15,9 +20,24 @@ export const createClient = (
 
 	return async <T = null, R extends ResponseType = "success-regular">(
 		path: string,
-		options: RequestInit = {},
+		options: FetchOptions = {},
 	): Promise<IApiResponse<T, R>> => {
-		const url = `${cleanedBaseUrl}${path}`;
+		const { query, ...initRequest } = options;
+
+		const url = new URL(`${cleanedBaseUrl}${path}`);
+		if (query) {
+			Object.entries(query).forEach(([key, value]) => {
+				if (value === undefined || value === null) return;
+
+				if (Array.isArray(value)) {
+					value.forEach((v) => {
+						url.searchParams.append(key, String(v));
+					});
+				} else {
+					url.searchParams.append(key, String(value));
+				}
+			});
+		}
 
 		const headers = new Headers(options.headers || {});
 		Object.entries(defaultHeaders).forEach(([k, v]) => {
@@ -30,8 +50,8 @@ export const createClient = (
 			body = JSON.stringify(body);
 		}
 
-		const response = await fetch(url, {
-			...options,
+		const response = await fetch(url.toString(), {
+			...initRequest,
 			headers,
 			body,
 			// @ts-expect-error - TS sometimes fights with undici types in global fetch

@@ -47,3 +47,12 @@ export type IServerHealth = {
 	uptime: number | null;
 	timestamp: string | null;
 };
+
+export interface ParsedQuery {
+	fields: string[];
+	filters: Record<string, unknown>;
+	page?: number;
+	limit?: number;
+	sort?: string;
+	search?: string;
+}
