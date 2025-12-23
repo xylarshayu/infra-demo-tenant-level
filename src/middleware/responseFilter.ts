@@ -6,7 +6,7 @@ const INTERNAL_SECRET_PREFIX = "__x_";
 export const sensitiveDataFilter = (
 	req: Request,
 	res: Response,
-	_next: NextFunction,
+	next: NextFunction,
 ) => {
 	const originalJson = res.json;
 
@@ -29,4 +29,6 @@ export const sensitiveDataFilter = (
 		res.setHeader("Content-Type", "application/json");
 		return res.send(filteredBody);
 	};
+
+	next();
 };
