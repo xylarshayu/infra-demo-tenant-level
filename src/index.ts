@@ -1,32 +1,8 @@
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
-import { pinoHttp } from "pino-http";
 import { closeHttpConnections } from "./clients/base/httpClient.js";
 import logger from "./logger.js";
-import { globalErrorHandler } from "./middleware/errorHandler.js";
-import { sensitiveDataFilter } from "./middleware/responseFilter.js";
-import routes from "./routes/index.route.js";
+import app from "./app.js";
 
-const app = express();
 const PORT = process.env.PORT || 3000;
-
-app.set('trust proxy', true);
-
-app.use(helmet());
-app.use(cors());
-app.use(pinoHttp({ logger }));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// --- Filter out data meant for internal microservices only eg database uri ---
-app.use(sensitiveDataFilter); // <- Sensitive object properties must start with the prefix
-
-app.use("/tenant-ser", routes);
-
-// --- (Note: Must stay last) ---
-app.use(globalErrorHandler);
 
 const server = app.listen(PORT, () => {
 	logger.info(`Env is ${process.env.NODE_ENV}`);
