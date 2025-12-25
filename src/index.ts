@@ -11,6 +11,8 @@ import routes from "./routes/index.route.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', true);
+
 app.use(helmet());
 app.use(cors());
 app.use(pinoHttp({ logger }));
