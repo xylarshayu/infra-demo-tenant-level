@@ -46,6 +46,7 @@ export type IServerHealth = {
 	status: "UP" | null;
 	uptime: number | null;
 	timestamp: string | null;
+	now: number;
 };
 
 export interface ParsedQuery {
